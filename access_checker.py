@@ -5,10 +5,25 @@ import selenium.webdriver
 import getpass
 from selenium.webdriver.common.keys import Keys
 import time
+import paramiko
 
-bad_result="☠"
-good_result="🍻"
-test_evidence={"Wendy":"☠","Wendy2":"☠" }
+bad_result = "☠"
+good_result = "🍻"
+test_evidence = {"Wendy": "☠", "Wendy2": "☠", "MAchine1":"☠"}
+
+def checkAccessToMachine(options):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(options['hostname'], username=options['user'],password=options['password'])
+    print("could connect")
+    stdin, stdout, stderr = ssh.exec_command('sudo -i -H -- echo $USER ; echo $USER')
+    if options['user'] in stdout.readline():
+        ssh.close()
+        return good_result
+    else:
+        ssh.close()
+        return bad_result
+
 def checkByValidationId(driver, options):
     try:
         driver.find_element_by_id(options["validation_id"])
@@ -26,7 +41,7 @@ def checkAccessToWebsite(options):
     driver.get(options["url"])
     # logout if needed
     # try:
-    #     driver.find_element_by_css_selector("span.glyphicon.glyphicon-off").click()
+    # driver.find_element_by_css_selector("span.glyphicon.glyphicon-off").click()
     # except selenium.common.exceptions.NoSuchElementException:
     #     print ("Exception caught")
     driver.find_element_by_id(options["username_id"]).send_keys(options["username"])
@@ -38,6 +53,7 @@ def checkAccessToWebsite(options):
     driver.maximize_window()
     return checkByValidationId(driver, options)
 
+
 options = {"url": "https://e-kartoteka.pl/#/login",
            "username": "",
            "password": "",
@@ -45,26 +61,32 @@ options = {"url": "https://e-kartoteka.pl/#/login",
            "password_name": "passwd",
            "button_class": "button.k-button.btn-block",
            "validation_id": "wlaczWskazowki",
-           "test_name":"Wendy"}
+           "test_name": "Wendy"}
 
-test_evidence[options['test_name']]=checkAccessToWebsite(options)
+# test_evidence[options['test_name']] = checkAccessToWebsite(options)
 
 options2 = {"url": "https://e-kartoteka.pl/#/login",
-           "username": "",
-           "password": "",
-           "username_id": "username",
-           "password_name": "passwd",
-           "button_class": "button.k-button.btn-block",
-           "validation_id": "wlaczWskazowki",
-           "test_name":"Wendy2"}
+            "username": "",
+            "password": "",
+            "username_id": "username",
+            "password_name": "passwd",
+            "button_class": "button.k-button.btn-block",
+            "validation_id": "wlaczWskazowki",
+            "test_name": "Wendy2"}
 
-test_evidence[options2['test_name']]=checkAccessToWebsite(options2)
+# test_evidence[options2['test_name']] = checkAccessToWebsite(options2)
 
 print (test_evidence)
 
+optionsHost={"user":"", "password":"", "hostname":"127.0.0.1", "test_name": "MAchine1"}
+
+test_evidence[optionsHost['test_name']] = checkAccessToMachine(optionsHost)
+print (test_evidence)
+# print (checkAccessToMachine(optionsHost))
+
 # options = {"url": "https://e-kartoteka.pl/#/login",
-#            "username": "d4721@domkrak",
-#            "password": "24801x",
+# "username": "",
+#            "password": "",
 #            "username_id": "username",
 #            "password_name": "passwd",
 #            "button_class": "button.k-button.btn-block",

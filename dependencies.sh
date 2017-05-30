@@ -7,4 +7,4 @@ brew install pyenv phantomjs
 
 pyenv install 3.6.1
 pyenv local 3.6.1
-pip install selenium sh terminaltables colorama
+pip install selenium sh terminaltables colorama paramiko
