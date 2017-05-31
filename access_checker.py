@@ -6,15 +6,19 @@ import getpass
 from selenium.webdriver.common.keys import Keys
 import time
 import paramiko
+from terminaltables import AsciiTable
+from colorama import Fore, Back, Style
+
 
 bad_result = "☠"
 good_result = "🍻"
-test_evidence = {"Wendy": "☠", "Wendy2": "☠", "MAchine1":"☠"}
+test_evidence = {"Wendy": "☠", "Wendy2": "☠", "MAchine1": "☠"}
+
 
 def checkAccessToMachine(options):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(options['hostname'], username=options['user'],password=options['password'])
+    ssh.connect(options['hostname'], username=options['user'], password=options['password'])
     print("could connect")
     stdin, stdout, stderr = ssh.exec_command('sudo -i -H -- echo $USER ; echo $USER')
     if options['user'] in stdout.readline():
@@ -23,6 +27,7 @@ def checkAccessToMachine(options):
     else:
         ssh.close()
         return bad_result
+
 
 def checkByValidationId(driver, options):
     try:
@@ -43,7 +48,7 @@ def checkAccessToWebsite(options):
     # try:
     # driver.find_element_by_css_selector("span.glyphicon.glyphicon-off").click()
     # except selenium.common.exceptions.NoSuchElementException:
-    #     print ("Exception caught")
+    # print ("Exception caught")
     driver.find_element_by_id(options["username_id"]).send_keys(options["username"])
     time.sleep(1)
     driver.find_element_by_name(options["password_name"]).send_keys(options["password"])
@@ -78,15 +83,25 @@ options2 = {"url": "https://e-kartoteka.pl/#/login",
 
 print (test_evidence)
 
-optionsHost={"user":"", "password":"", "hostname":"127.0.0.1", "test_name": "MAchine1"}
+optionsHost = {"user": "", "password": "", "hostname": "", "test_name": "MAchine1"}
 
 test_evidence[optionsHost['test_name']] = checkAccessToMachine(optionsHost)
 print (test_evidence)
+
+table_data = [
+    ['Test', 'Status'],
+    ['Wendy', test_evidence['Wendy']],
+    ['Wendy2', test_evidence['Wendy']],
+    ['Access to a server', test_evidence['MAchine1']]
+]
+print(Fore.GREEN + '------========================SUMMARY========================------')
+table = AsciiTable(table_data)
+print (Fore.RED + table.table)
 # print (checkAccessToMachine(optionsHost))
 
 # options = {"url": "https://e-kartoteka.pl/#/login",
 # "username": "",
-#            "password": "",
+# "password": "",
 #            "username_id": "username",
 #            "password_name": "passwd",
 #            "button_class": "button.k-button.btn-block",
