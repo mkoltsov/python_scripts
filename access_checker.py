@@ -14,12 +14,39 @@ bad_result = "☠"
 good_result = "🍻"
 test_evidence = {"Wendy": "☠", "Wendy2": "☠", "MAchine1": "☠"}
 
+# username = input("Please enter your username:")
+print ("Please enter you AD password")
+adPassword = getpass.getpass()
+
+print ("Please enter you onshore LDAP password")
+onshorePassword = getpass.getpass()
+
+print ("Please enter you offshore LDAP password")
+offshorePassword = getpass.getpass()
+
+test_data = [
+    ['Test name', 'Status', 'Type of test', 'URI', 'username', "password_type", "username_id", "password_name", "validation_id", "button_class"],
+    ['Wendy', "☠", "http", "https://e-kartoteka.pl/#/login", "d4721@domkrak", "AD", "username", "passwd","wlaczWskazowki", "button.k-button.btn-block"]#,
+    # ['Wendy2', "☠"],
+    # ['Access to a server', "☠"]
+]
+
+
+
+# options = {"url": "https://e-kartoteka.pl/#/login",
+# "username": "",
+#            "password": "",
+#            "username_id": "username",
+#            "password_name": "passwd",
+#            "button_class": "button.k-button.btn-block",
+#            "validation_id": "wlaczWskazowki",
+#            "test_name": "Wendy"}
 
 def checkAccessToMachine(options):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(options['hostname'], username=options['user'], password=options['password'])
-    print("could connect")
+    # print("could connect")
     stdin, stdout, stderr = ssh.exec_command('sudo -i -H -- echo $USER ; echo $USER')
     if options['user'] in stdout.readline():
         ssh.close()
@@ -59,43 +86,65 @@ def checkAccessToWebsite(options):
     return checkByValidationId(driver, options)
 
 
-options = {"url": "https://e-kartoteka.pl/#/login",
-           "username": "",
-           "password": "",
-           "username_id": "username",
-           "password_name": "passwd",
-           "button_class": "button.k-button.btn-block",
-           "validation_id": "wlaczWskazowki",
-           "test_name": "Wendy"}
+for list in test_data:
+    if list[0] == 'Test name':
+        continue
 
-# test_evidence[options['test_name']] = checkAccessToWebsite(options)
+    if list[5] == 'AD':
+        password = adPassword
+    elif list[5] == 'onshore':
+        password = onshorePassword
+    else:
+        password = offshorePassword
 
-options2 = {"url": "https://e-kartoteka.pl/#/login",
-            "username": "",
-            "password": "",
-            "username_id": "username",
-            "password_name": "passwd",
-            "button_class": "button.k-button.btn-block",
-            "validation_id": "wlaczWskazowki",
-            "test_name": "Wendy2"}
+    if list[2] == 'http':
+        list[1] = checkAccessToWebsite({"url": list[3],
+                                        "username": list[4],
+                                        "password": password,
+                                        "username_id": list[7],
+                                        "password_name": list[7],
+                                        "button_class": list[9],
+                                        "validation_id": list[8]})
+    elif list[2] == 'ssh':
+        checkAccessToMachine({"user": "", "password": "", "hostname": "", "test_name": "MAchine1"})
 
-# test_evidence[options2['test_name']] = checkAccessToWebsite(options2)
-
-print (test_evidence)
-
-optionsHost = {"user": "", "password": "", "hostname": "", "test_name": "MAchine1"}
-
-test_evidence[optionsHost['test_name']] = checkAccessToMachine(optionsHost)
-print (test_evidence)
-
-table_data = [
-    ['Test', 'Status'],
-    ['Wendy', test_evidence['Wendy']],
-    ['Wendy2', test_evidence['Wendy']],
-    ['Access to a server', test_evidence['MAchine1']]
-]
+# options = {"url": "https://e-kartoteka.pl/#/login",
+#            "username": "",
+#            "password": "",
+#            "username_id": "username",
+#            "password_name": "passwd",
+#            "button_class": "button.k-button.btn-block",
+#            "validation_id": "wlaczWskazowki",
+#            "test_name": "Wendy"}
+#
+# # test_evidence[options['test_name']] = checkAccessToWebsite(options)
+#
+# options2 = {"url": "https://e-kartoteka.pl/#/login",
+#             "username": "",
+#             "password": "",
+#             "username_id": "username",
+#             "password_name": "passwd",
+#             "button_class": "button.k-button.btn-block",
+#             "validation_id": "wlaczWskazowki",
+#             "test_name": "Wendy2"}
+#
+# # test_evidence[options2['test_name']] = checkAccessToWebsite(options2)
+#
+# print (test_evidence)
+#
+# optionsHost = {"user": "", "password": "", "hostname": "", "test_name": "MAchine1"}
+#
+# test_evidence[optionsHost['test_name']] = checkAccessToMachine(optionsHost)
+# print (test_evidence)
+#
+# table_data = [
+#     ['Test', 'Status'],
+#     ['Wendy', test_evidence['Wendy']],
+#     ['Wendy2', test_evidence['Wendy']],
+#     ['Access to a server', test_evidence['MAchine1']]
+# ]
 print(Fore.GREEN + '------========================SUMMARY========================------')
-table = AsciiTable(table_data)
+table = AsciiTable(test_data)
 print (Fore.RED + table.table)
 # print (checkAccessToMachine(optionsHost))
 
